@@ -643,8 +643,8 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
     List<ReceiptItem> extractedItems,
     Map<String, double> extractedFees,
   ) async {
-    // Extract unmapped numbers (placeholder - would come from OCR service)
-    final unmappedNumbers = <double>[15.75, 2.50, 0.99, 25.00];
+    // Extract unmapped numbers from OCR service
+    final unmappedNumbers = _ocrService.lastUnmappedNumbers;
     
     // Extract detected total (placeholder - would come from OCR service)
     final detectedTotal = extractedFees['total'];

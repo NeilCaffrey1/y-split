@@ -8,6 +8,7 @@ import '../models/receipt_item.dart';
 class OCRService {
   bool _isInitialized = false;
   Map<String, double> _lastExtractedFees = {};
+  List<double> _lastUnmappedNumbers = [];
 
   /// Initialize OCR service
   Future<bool> initialize() async {
@@ -75,6 +76,10 @@ class OCRService {
         'OCR parsed ${parsedItems.length} items: ${parsedItems.map((i) => '${i.name}: ${i.price}').join(', ')}',
       );
 
+      // Extract unmapped numbers after parsing items and fees
+      _lastUnmappedNumbers = _extractUnmappedNumbers(ocrText, parsedItems, _lastExtractedFees);
+      debugPrint('OCR extracted unmapped numbers: $_lastUnmappedNumbers');
+
       return parsedItems;
     } catch (e) {
       debugPrint('OCR error: $e');
@@ -84,6 +89,9 @@ class OCRService {
 
   /// Get the last extracted fees and totals
   Map<String, double> get lastExtractedFees => Map.from(_lastExtractedFees);
+
+  /// Get the last extracted unmapped numbers
+  List<double> get lastUnmappedNumbers => List.from(_lastUnmappedNumbers);
 
   List<ReceiptItem> _parseReceiptText(String text) {
     final items = <ReceiptItem>[];
@@ -208,6 +216,94 @@ class OCRService {
     }
 
     return fees;
+  }
+
+  /// Extract numbers from OCR text that couldn't be classified as items or fees
+  List<double> _extractUnmappedNumbers(
+    String text,
+    List<ReceiptItem> parsedItems,
+    Map<String, double> extractedFees,
+  ) {
+    final unmappedNumbers = <double>[];
+    final lines = text.split('\n');
+    
+    // Collect all numbers that were already classified
+    final classifiedNumbers = <double>{};
+    
+    // Add item prices
+    for (final item in parsedItems) {
+      classifiedNumbers.add(item.price);
+    }
+    
+    // Add fee amounts
+    for (final fee in extractedFees.values) {
+      classifiedNumbers.add(fee);
+    }
+    
+    // Find all numbers in the text
+    for (final line in lines) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) continue;
+      
+      // Look for standalone numbers or numbers with currency
+      final numberMatches = RegExp(r'(?:JOD\s*)?(\d+\.\d{2})').allMatches(trimmed);
+      
+      for (final match in numberMatches) {
+        final numberStr = match.group(1);
+        if (numberStr != null) {
+          final number = double.tryParse(numberStr);
+          if (number != null && number > 0) {
+            // Check if this number is already classified
+            bool isClassified = false;
+            for (final classified in classifiedNumbers) {
+              if ((number - classified).abs() < 0.01) { // Allow for small floating point differences
+                isClassified = true;
+                break;
+              }
+            }
+            
+            // If not classified and not already in unmapped list, add it
+            if (!isClassified && !unmappedNumbers.any((n) => (n - number).abs() < 0.01)) {
+              // Additional filtering: skip very common numbers that are likely not prices
+              if (number >= 0.10 && number <= 1000.00) { // Reasonable price range
+                unmappedNumbers.add(number);
+              }
+            }
+          }
+        }
+      }
+      
+      // Also look for standalone decimal numbers without currency
+      final standaloneMatches = RegExp(r'\b(\d+\.\d{2})\b').allMatches(trimmed);
+      for (final match in standaloneMatches) {
+        final numberStr = match.group(1);
+        if (numberStr != null) {
+          final number = double.tryParse(numberStr);
+          if (number != null && number > 0) {
+            // Check if this number is already classified
+            bool isClassified = false;
+            for (final classified in classifiedNumbers) {
+              if ((number - classified).abs() < 0.01) {
+                isClassified = true;
+                break;
+              }
+            }
+            
+            // If not classified and not already in unmapped list, add it
+            if (!isClassified && !unmappedNumbers.any((n) => (n - number).abs() < 0.01)) {
+              if (number >= 0.10 && number <= 1000.00) {
+                unmappedNumbers.add(number);
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Sort unmapped numbers for consistent ordering
+    unmappedNumbers.sort();
+    
+    return unmappedNumbers;
   }
 
   bool get isAvailable => true;

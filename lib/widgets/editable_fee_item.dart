@@ -78,7 +78,7 @@ class _EditableFeeItemState extends State<EditableFeeItem> {
         Row(
           children: [
             Text(
-              '\$${widget.amount.toStringAsFixed(2)}',
+              widget.amount.toStringAsFixed(2),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
@@ -240,7 +240,7 @@ class _EditableFeeItemState extends State<EditableFeeItem> {
           _errorText = 'Amount cannot be negative';
         } else if (amount > 9999.99) {
           _hasError = true;
-          _errorText = 'Amount cannot exceed \$9999.99';
+          _errorText = 'Amount cannot exceed 9999.99';
         } else {
           _hasError = false;
           _errorText = null;

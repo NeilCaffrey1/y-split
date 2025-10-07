@@ -189,7 +189,7 @@ class _TotalsSectionState extends State<TotalsSection> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                '\$${amount.toStringAsFixed(2)}',
+                                amount.toStringAsFixed(2),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,

@@ -174,7 +174,7 @@ class _EditableFeeItemState extends State<EditableFeeItem> {
   /// Build the display field for amount
   Widget _buildDisplayField() {
     return Text(
-      '\${widget.amount.toStringAsFixed(2)}',
+      widget.amount.toStringAsFixed(2),
       style: TextStyle(
         color: Colors.grey[600],
         fontWeight: FontWeight.w500,

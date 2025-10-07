@@ -181,7 +181,7 @@ class _ItemsSectionState extends State<ItemsSection> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '\$${item.price.toStringAsFixed(2)}',
+                          item.price.toStringAsFixed(2),
                           style: TextStyle(
                             color: Colors.grey[600], 
                             fontSize: 14,

@@ -63,14 +63,14 @@
   - Test edge cases with invalid input formats
   - _Requirements: 4.2, 4.3, 5.1, 5.2_
 
-- [-] 4. Create fees management section
+- [x] 4. Create fees management section
 
   - Implement FeesList component for tax, service, and delivery fees
   - Add editable fee tiles with category labels and validation
   - Create fee editing interface with proper number formatting
   - _Requirements: 3.1, 3.4, 4.2_
 
-- [-] 4.1 Build unmapped numbers interface
+- [x] 4.1 Build unmapped numbers interface
 
   - Create UnmappedNumberTile component for unclassified numbers
   - Implement category mapping dropdown/bottom sheet

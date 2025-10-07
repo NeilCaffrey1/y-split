@@ -287,7 +287,7 @@ class ResultsPanel extends StatelessWidget {
       children: [
         Text(label),
         Text(
-          '\${amount.toStringAsFixed(2)}',
+          amount.toStringAsFixed(2),
           style: TextStyle(
             fontWeight: FontWeight.w600,
             color: isError ? Colors.orange[800] : null,

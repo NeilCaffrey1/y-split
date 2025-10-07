@@ -30,17 +30,13 @@ class UnmappedNumberTile extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Icon(
-                  Icons.help_outline,
-                  color: Colors.blue[600],
-                  size: 20,
-                ),
+                Icon(Icons.help_outline, color: Colors.blue[600], size: 20),
                 const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '\${number.value.toStringAsFixed(2)}',
+                      number.value.toStringAsFixed(2),
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 16,
@@ -49,10 +45,7 @@ class UnmappedNumberTile extends StatelessWidget {
                     if (number.originalText != number.value.toStringAsFixed(2))
                       Text(
                         'Original: ${number.originalText}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                   ],
                 ),
@@ -75,7 +68,7 @@ class UnmappedNumberTile extends StatelessWidget {
   /// Show mapping options for unmapped number
   void _showMappingOptions(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
-    
+
     if (isMobile) {
       _showMobileBottomSheet(context);
     } else {
@@ -110,11 +103,8 @@ class UnmappedNumberTile extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Map \${number.value.toStringAsFixed(2)} as:',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              'Map ${number.value.toStringAsFixed(2)} as:',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             ..._buildMappingOptions(context),
@@ -128,11 +118,15 @@ class UnmappedNumberTile extends StatelessWidget {
   /// Show desktop dropdown menu
   void _showDesktopDropdown(BuildContext context) {
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -203,7 +197,7 @@ class UnmappedNumberTile extends StatelessWidget {
         ),
       ],
     ).then((value) {
-      if (value != null) {
+      if (value != null && context.mounted) {
         _handleMapping(context, value);
       }
     });
@@ -267,10 +261,7 @@ class UnmappedNumberTile extends StatelessWidget {
   }) {
     return ListTile(
       leading: Icon(icon, color: Colors.blue[600]),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle),
       onTap: () {
         Navigator.pop(context);
@@ -291,7 +282,7 @@ class UnmappedNumberTile extends StatelessWidget {
   /// Show dialog to get item name when mapping as item
   void _showItemNameDialog(BuildContext context) {
     final controller = TextEditingController();
-    
+
     showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -301,7 +292,7 @@ class UnmappedNumberTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Enter name for item with price \${number.value.toStringAsFixed(2)}:',
+              'Enter name for item with price ${number.value.toStringAsFixed(2)}:',
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),

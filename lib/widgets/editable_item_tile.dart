@@ -78,7 +78,7 @@ class _EditableItemTileState extends State<EditableItemTile> {
               ),
               const SizedBox(height: 4),
               Text(
-                '\$${widget.item.price.toStringAsFixed(2)}',
+                widget.item.price.toStringAsFixed(2),
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 14,
@@ -248,7 +248,7 @@ class _EditableItemTileState extends State<EditableItemTile> {
           _priceErrorText = 'Price must be greater than 0';
         } else if (price > 9999.99) {
           _hasPriceError = true;
-          _priceErrorText = 'Price cannot exceed \$9999.99';
+          _priceErrorText = 'Price cannot exceed 9999.99';
         } else {
           _hasPriceError = false;
           _priceErrorText = null;

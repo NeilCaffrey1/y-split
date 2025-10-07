@@ -444,7 +444,7 @@ class _OCRReviewDialogState extends State<OCRReviewDialog>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Enter name for item with price \$${price.toStringAsFixed(2)}:'),
+            Text('Enter name for item with price ${price.toStringAsFixed(2)}:'),
             const SizedBox(height: 16),
             TextField(
               controller: controller,

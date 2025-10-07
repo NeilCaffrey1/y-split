@@ -264,7 +264,7 @@ class ResultsPanel extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '\$${number.value.toStringAsFixed(2)}',
+                number.value.toStringAsFixed(2),
                 style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
@@ -296,7 +296,7 @@ class ResultsPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Map \$${state.unmappedNumbers[index].value.toStringAsFixed(2)} as:',
+              'Map ${state.unmappedNumbers[index].value.toStringAsFixed(2)} as:',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -432,7 +432,7 @@ class ResultsPanel extends StatelessWidget {
       children: [
         Text(label),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
+          amount.toStringAsFixed(2),
           style: TextStyle(
             fontWeight: FontWeight.w600,
             color: isError ? Colors.orange[800] : null,

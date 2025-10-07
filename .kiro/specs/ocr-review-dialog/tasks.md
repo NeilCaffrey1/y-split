@@ -133,14 +133,14 @@
   - Test totals calculation with mixed manual and OCR items
   - _Requirements: 6.1, 6.2, 6.3, 6.5_
 
-- [-] 7. Implement dialog action bar and state management
+- [x] 7. Implement dialog action bar and state management
 
   - Create action bar with Cancel, Add Item, and Apply Changes buttons
   - Implement proper state cleanup on cancel operation
   - Add confirmation dialog when canceling with unsaved changes
   - _Requirements: 1.4, 1.5, 8.4_
 
-- [-] 7.1 Add data privacy and session management
+- [x] 7.1 Add data privacy and session management
 
   - Ensure all dialog state remains local and temporary
   - Implement proper cleanup when dialog closes or page refreshes

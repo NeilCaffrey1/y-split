@@ -102,10 +102,12 @@ class OCRReviewDialog extends StatefulWidget {
 }
 
 class _OCRReviewDialogState extends State<OCRReviewDialog>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late OCRReviewState _state;
+  late OCRReviewState _originalState;
   late TabController _tabController;
   bool _hasUnsavedChanges = false;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -433,52 +435,203 @@ class _OCRReviewDialogState extends State<OCRReviewDialog>
     });
   }
 
-  /// Show dialog to get item name for mapped number
-  Future<String?> _showItemNameDialog(double price) async {
+  /// Show dialog to add a new item manually
+  Future<void> _showAddItemDialog() async {
     final controller = TextEditingController();
+    String? validationError;
     
-    return showDialog<String>(
+    final result = await showDialog<DetectedItem>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Item Name'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Enter name for item with price ${price.toStringAsFixed(2)}:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Item Name',
-                border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Item'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Enter item name and price:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: '12.50 pizza or pizza 12.50',
+                  border: const OutlineInputBorder(),
+                  errorText: validationError,
+                  helperText: 'Examples: "12.50 pizza", "coffee 4.25"',
+                  helperMaxLines: 2,
+                ),
+                textCapitalization: TextCapitalization.words,
+                autofocus: true,
+                onChanged: (value) {
+                  setDialogState(() {
+                    if (value.trim().isEmpty) {
+                      validationError = null;
+                    } else {
+                      final parsed = _parseItemInput(value.trim());
+                      validationError = parsed == null ? 'Invalid format' : null;
+                    }
+                  });
+                },
+                onSubmitted: (value) {
+                  final parsed = _parseItemInput(value.trim());
+                  if (parsed != null) {
+                    Navigator.of(context).pop(parsed);
+                  }
+                },
               ),
-              textCapitalization: TextCapitalization.words,
-              autofocus: true,
+              if (validationError != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _getInputSuggestion(controller.text),
+                  style: TextStyle(
+                    color: Colors.blue[600],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: validationError == null && controller.text.trim().isNotEmpty
+                  ? () {
+                      final parsed = _parseItemInput(controller.text.trim());
+                      if (parsed != null) {
+                        Navigator.of(context).pop(parsed);
+                      }
+                    }
+                  : null,
+              child: const Text('Add Item'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                Navigator.of(context).pop(name);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
+
+    if (result != null) {
+      setState(() {
+        final updatedItems = List<DetectedItem>.from(_state.items);
+        updatedItems.add(result);
+        _state = _state.copyWith(items: updatedItems);
+      });
+      _markAsChanged();
+
+      // Show success feedback
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Added: ${result.name} - \$${result.price.toStringAsFixed(2)}',
+            ),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green[600],
+          ),
+        );
+      }
+    }
   }
 
+  /// Parse item input with smart price parsing (similar to ItemsSection)
+  DetectedItem? _parseItemInput(String input) {
+    if (input.trim().isEmpty) return null;
+
+    // Enhanced parsing for multiple formats
+    String cleanInput = input.trim();
+
+    // Remove extra whitespace
+    cleanInput = cleanInput.replaceAll(RegExp(r'\s+'), ' ');
+
+    // Try different parsing patterns
+    final patterns = [
+      // Pattern 1: "12.50 pizza" or "12.5 pizza"
+      RegExp(r'^(\d+(?:\.\d{1,2})?)\s+(.+)$'),
+      // Pattern 2: "pizza 12.50" or "pizza 12.5"
+      RegExp(r'^(.+)\s+(\d+(?:\.\d{1,2})?)$'),
+      // Pattern 3: "$12.50 pizza" or "$12.5 pizza"
+      RegExp(r'^\$(\d+(?:\.\d{1,2})?)\s+(.+)$'),
+      // Pattern 4: "pizza $12.50" or "pizza $12.5"
+      RegExp(r'^(.+)\s+\$(\d+(?:\.\d{1,2})?)$'),
+    ];
+
+    for (int i = 0; i < patterns.length; i++) {
+      final match = patterns[i].firstMatch(cleanInput);
+      if (match != null) {
+        String? priceStr;
+        String? name;
+
+        if (i == 0 || i == 2) {
+          // Price first format
+          priceStr = match.group(1);
+          name = match.group(2);
+        } else {
+          // Name first format
+          name = match.group(1);
+          priceStr = match.group(2);
+        }
+
+        if (priceStr != null && name != null) {
+          final price = double.tryParse(priceStr);
+          if (price != null && price > 0 && price <= 9999.99) {
+            // Validate name is not just numbers or symbols
+            final cleanName = name.trim();
+            if (cleanName.isNotEmpty &&
+                cleanName.length >= 2 &&
+                RegExp(r'[a-zA-Z]').hasMatch(cleanName)) {
+              return DetectedItem(
+                name: cleanName,
+                price: double.parse(price.toStringAsFixed(2)), // Ensure 2 decimal places
+                originalText: 'Manual: $cleanName \$${price.toStringAsFixed(2)}',
+              );
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /// Get input suggestion for invalid formats
+  String _getInputSuggestion(String input) {
+    if (input.trim().isEmpty) return '';
+
+    // Try to suggest corrections for common mistakes
+    final corrected = _autoCorrectInput(input.trim());
+    if (corrected != input.trim()) {
+      return 'Did you mean: $corrected?';
+    }
+
+    return 'Try: "12.50 pizza" or "pizza 12.50"';
+  }
+
+  /// Auto-correct common input mistakes
+  String _autoCorrectInput(String input) {
+    String corrected = input;
+
+    // Fix missing decimal places: 12.5 -> 12.50
+    corrected = corrected.replaceAllMapped(
+      RegExp(r'(\d+)\.(\d)(?!\d)'),
+      (match) => '${match.group(1)}.${match.group(2)}0',
+    );
+
+    // Remove extra dollar signs in the middle: pizza $12.50 -> pizza 12.50
+    corrected = corrected.replaceAllMapped(
+      RegExp(r'^(.+)\s+\$(\d+\.?\d*)$'),
+      (match) => '${match.group(1)} ${match.group(2)}',
+    );
+
+    return corrected;
+  }
+
+
+
   void _handleAddItem() {
-    // TODO: Implement manual item addition
-    _markAsChanged();
+    _showAddItemDialog();
   }
 
   void _handleCancel() {
@@ -490,7 +643,7 @@ class _OCRReviewDialogState extends State<OCRReviewDialog>
   }
 
   void _handleApply() {
-    // Convert DetectedItems back to ReceiptItems
+    // Convert DetectedItems back to ReceiptItems (includes both OCR and manual items)
     final receiptItems = _state.items
         .map((item) => item.toReceiptItem())
         .toList();

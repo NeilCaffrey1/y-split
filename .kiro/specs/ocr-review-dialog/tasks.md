@@ -91,7 +91,7 @@
   - Test category selection and item name input
   - _Requirements: 3.1, 3.2, 3.5_
 
-- [ ] 5. Implement real-time totals calculation and validation
+- [x] 5. Implement real-time totals calculation and validation
 
   - Create TotalsSummary component with calculated vs detected total comparison
   - Add real-time calculation updates when items or fees change
@@ -119,7 +119,7 @@
   - Add smart price parsing support ("12.50 pizza" format)
   - _Requirements: 6.1, 6.2, 6.3, 6.5_
 
-- [ ] 6.1 Integrate manual items with existing OCR results
+- [x] 6.1 Integrate manual items with existing OCR results
 
   - Merge manually added items with OCR-detected items in results list
   - Update totals calculation to include manual items
@@ -133,14 +133,14 @@
   - Test totals calculation with mixed manual and OCR items
   - _Requirements: 6.1, 6.2, 6.3, 6.5_
 
-- [ ] 7. Implement dialog action bar and state management
+- [x] 7. Implement dialog action bar and state management
 
   - Create action bar with Cancel, Add Item, and Apply Changes buttons
   - Implement proper state cleanup on cancel operation
   - Add confirmation dialog when canceling with unsaved changes
   - _Requirements: 1.4, 1.5, 8.4_
 
-- [ ] 7.1 Add data privacy and session management
+- [x] 7.1 Add data privacy and session management
 
   - Ensure all dialog state remains local and temporary
   - Implement proper cleanup when dialog closes or page refreshes

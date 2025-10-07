@@ -306,6 +306,20 @@ class OCRService {
     return unmappedNumbers;
   }
 
+  /// Clear cached OCR data for privacy compliance
+  void clearCache() {
+    _lastExtractedFees.clear();
+    _lastUnmappedNumbers.clear();
+    debugPrint('OCR Service: Cache cleared for privacy compliance');
+  }
+
+  /// Reset service state (for privacy compliance)
+  void reset() {
+    clearCache();
+    _isInitialized = false;
+    debugPrint('OCR Service: Service reset for privacy compliance');
+  }
+
   bool get isAvailable => true;
   bool get isInitialized => _isInitialized;
 }

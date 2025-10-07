@@ -139,7 +139,9 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
     _lastPeopleHash = 0;
     _lastFeesTotal = 0.0;
 
-    // Clear any cached OCR data (handled by OCR service cleanup)
+    // Clear OCR service data for privacy compliance
+    _cleanupOCRData();
+    
     // Note: No setState needed during disposal
   }
 
@@ -649,15 +651,38 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
     // Extract detected total (placeholder - would come from OCR service)
     final detectedTotal = extractedFees['total'];
 
-    return await OCRReviewDialog.show(
-      context,
-      imageBytes: imageBytes,
-      detectedItems: extractedItems,
-      detectedFees: extractedFees,
-      unmappedNumbers: unmappedNumbers,
-      detectedTotal: detectedTotal,
-      onApply: _handleOCRReviewApply,
-    );
+    try {
+      // Show dialog with proper error handling for privacy compliance
+      final result = await OCRReviewDialog.show(
+        context,
+        imageBytes: imageBytes,
+        detectedItems: extractedItems,
+        detectedFees: extractedFees,
+        unmappedNumbers: unmappedNumbers,
+        detectedTotal: detectedTotal,
+        onApply: _handleOCRReviewApply,
+      );
+
+      // Ensure cleanup happens regardless of result (privacy requirement)
+      _cleanupOCRData();
+      
+      return result;
+    } catch (e) {
+      // Handle any errors and ensure cleanup
+      _cleanupOCRData();
+      debugPrint('OCR Review Dialog error: $e');
+      rethrow;
+    }
+  }
+
+  /// Clean up OCR-related data for privacy compliance
+  void _cleanupOCRData() {
+    try {
+      // Clear OCR service cache (local processing only)
+      _ocrService.clearCache();
+    } catch (e) {
+      debugPrint('Error during OCR cleanup: $e');
+    }
   }
 
   /// Handle apply changes from OCR review dialog

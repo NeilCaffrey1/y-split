@@ -116,7 +116,7 @@
 
   - Implement "Add Item" button and input dialog
   - Create new item form with name and price fields
-  - Add smart price parsing support ("$12.50" format)
+  - Add smart price parsing support ("12.50 pizza" format)
   - _Requirements: 6.1, 6.2, 6.3, 6.5_
 
 - [ ] 6.1 Integrate manual items with existing OCR results

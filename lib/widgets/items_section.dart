@@ -202,6 +202,49 @@ class _ItemsSectionState extends State<ItemsSection> {
                       ],
                     ),
                   ),
+                  // Quick actions: Split by quantity (when name like "N x ..."), Duplicate, Delete
+                  IconButton(
+                    onPressed: () {
+                      final m = RegExp(r'^(\d+)\s*x\s*(.+)$').firstMatch(item.name);
+                      if (m != null) {
+                        final qtyStr = m.group(1);
+                        final baseName = m.group(2)?.trim() ?? item.name;
+                        final qty = int.tryParse(qtyStr ?? '');
+                        if (qty != null && qty > 0) {
+                          final unitPrice = (item.price / qty);
+                          // Remove original then add qty items
+                          widget.onItemRemoved(index);
+                          for (int i = 0; i < qty; i++) {
+                            widget.onItemAdded(ReceiptItem(
+                              name: baseName,
+                              price: double.parse(unitPrice.toStringAsFixed(2)),
+                            ));
+                          }
+                          return;
+                        }
+                      }
+                      // No-op if not splittable
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Item name must be like "N x Name" to split'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.call_split),
+                    iconSize: 20,
+                    color: Colors.grey[500],
+                    tooltip: 'Split by quantity',
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      widget.onItemAdded(ReceiptItem(name: item.name, price: item.price));
+                    },
+                    icon: const Icon(Icons.copy),
+                    iconSize: 20,
+                    color: Colors.grey[500],
+                    tooltip: 'Duplicate item',
+                  ),
                   IconButton(
                     onPressed: () => widget.onItemRemoved(index),
                     icon: const Icon(Icons.delete_outline),

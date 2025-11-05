@@ -237,6 +237,8 @@ class _EditableFeeItemState extends State<EditableFeeItem> {
         return Icons.room_service;
       case 'delivery':
         return Icons.delivery_dining;
+      case 'discount':
+        return Icons.local_offer;
       default:
         return Icons.attach_money;
     }
@@ -251,6 +253,8 @@ class _EditableFeeItemState extends State<EditableFeeItem> {
         return 'Service Fee';
       case 'delivery':
         return 'Delivery Fee';
+      case 'discount':
+        return 'Discount';
       default:
         return feeType.toUpperCase();
     }

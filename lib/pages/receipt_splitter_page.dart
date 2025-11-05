@@ -28,6 +28,7 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
   double _taxAmount = 0.0;
   double _serviceAmount = 0.0;
   double _deliveryAmount = 0.0;
+  double _discountAmount = 0.0;
   bool _isProcessingOCR = false;
 
   // Animation controllers for smooth transitions
@@ -132,6 +133,7 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
     _taxAmount = 0.0;
     _serviceAmount = 0.0;
     _deliveryAmount = 0.0;
+    _discountAmount = 0.0;
 
     // Clear cached calculations
     _cachedTotals = null;
@@ -147,7 +149,8 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
 
   /// Performance optimization: Get cached totals or calculate if needed
   Map<Person, double> _getOptimizedTotals() {
-    final currentFeesTotal = _taxAmount + _serviceAmount + _deliveryAmount;
+    final currentFeesTotal =
+        _taxAmount + _serviceAmount + _deliveryAmount - _discountAmount;
     final currentItemsHash = _matrix.items
         .map(
           (item) =>
@@ -191,7 +194,7 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
         title: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: Text(
-            'Receipt Splitter',
+            'Smart Receipt Splitter',
             key: ValueKey(_matrix.items.length),
             style: const TextStyle(
               fontWeight: FontWeight.w600,
@@ -259,6 +262,7 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
                   taxAmount: _taxAmount,
                   serviceAmount: _serviceAmount,
                   deliveryAmount: _deliveryAmount,
+                  discountAmount: _discountAmount,
                   onFeesChanged: _handleFeesChanged,
                   onShare: _handleShare,
                 ),
@@ -703,6 +707,7 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
       _taxAmount = reviewedFees['tax'] ?? 0.0;
       _serviceAmount = reviewedFees['service'] ?? 0.0;
       _deliveryAmount = reviewedFees['delivery'] ?? 0.0;
+      _discountAmount = reviewedFees['discount'] ?? 0.0;
 
       // Invalidate cache to force recalculation
       _invalidateCache();
@@ -776,11 +781,12 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
     });
   }
 
-  void _handleFeesChanged(double tax, double service, double delivery) {
+  void _handleFeesChanged(double tax, double service, double delivery, double discount) {
     setState(() {
       _taxAmount = tax;
       _serviceAmount = service;
       _deliveryAmount = delivery;
+      _discountAmount = discount;
       _invalidateCache();
     });
   }

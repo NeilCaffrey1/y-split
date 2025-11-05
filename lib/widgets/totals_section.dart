@@ -7,7 +7,8 @@ class TotalsSection extends StatefulWidget {
   final double taxAmount;
   final double serviceAmount;
   final double deliveryAmount;
-  final Function(double, double, double) onFeesChanged;
+  final double discountAmount;
+  final Function(double, double, double, double) onFeesChanged;
   final VoidCallback onShare;
 
   const TotalsSection({
@@ -16,6 +17,7 @@ class TotalsSection extends StatefulWidget {
     required this.taxAmount,
     required this.serviceAmount,
     required this.deliveryAmount,
+    required this.discountAmount,
     required this.onFeesChanged,
     required this.onShare,
   });
@@ -28,6 +30,7 @@ class _TotalsSectionState extends State<TotalsSection> {
   final TextEditingController _taxController = TextEditingController();
   final TextEditingController _serviceController = TextEditingController();
   final TextEditingController _deliveryController = TextEditingController();
+  final TextEditingController _discountController = TextEditingController();
   Timer? _debounceTimer;
 
   getTotal(totals) {
@@ -44,6 +47,7 @@ class _TotalsSectionState extends State<TotalsSection> {
     _taxController.text = widget.taxAmount.toStringAsFixed(2);
     _serviceController.text = widget.serviceAmount.toStringAsFixed(2);
     _deliveryController.text = widget.deliveryAmount.toStringAsFixed(2);
+    _discountController.text = widget.discountAmount.toStringAsFixed(2);
   }
 
   @override
@@ -59,6 +63,9 @@ class _TotalsSectionState extends State<TotalsSection> {
     if (widget.deliveryAmount != oldWidget.deliveryAmount) {
       _deliveryController.text = widget.deliveryAmount.toStringAsFixed(2);
     }
+    if (widget.discountAmount != oldWidget.discountAmount) {
+      _discountController.text = widget.discountAmount.toStringAsFixed(2);
+    }
   }
 
   @override
@@ -67,6 +74,7 @@ class _TotalsSectionState extends State<TotalsSection> {
     _taxController.dispose();
     _serviceController.dispose();
     _deliveryController.dispose();
+    _discountController.dispose();
     super.dispose();
   }
 
@@ -98,6 +106,14 @@ class _TotalsSectionState extends State<TotalsSection> {
                 child: _buildFeeField(
                   'Delivery:',
                   _deliveryController,
+                  _updateFees,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildFeeField(
+                  'Discount:',
+                  _discountController,
                   _updateFees,
                 ),
               ),
@@ -270,7 +286,8 @@ class _TotalsSectionState extends State<TotalsSection> {
       final tax = double.tryParse(_taxController.text) ?? 0.0;
       final service = double.tryParse(_serviceController.text) ?? 0.0;
       final delivery = double.tryParse(_deliveryController.text) ?? 0.0;
-      widget.onFeesChanged(tax, service, delivery);
+      final discount = double.tryParse(_discountController.text) ?? 0.0;
+      widget.onFeesChanged(tax, service, delivery, discount);
     });
   }
 }

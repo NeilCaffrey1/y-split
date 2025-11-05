@@ -405,7 +405,7 @@ class _PeopleSectionState extends State<PeopleSection> {
                                           key: ValueKey('check_$personIndex'),
                                         )
                                       : Text(
-                                          person.name.substring(0, 1).toUpperCase(),
+                                          person.name.substring(0, 3).toUpperCase(),
                                           style: TextStyle(
                                             color: Colors.grey[600],
                                             fontSize: 13,

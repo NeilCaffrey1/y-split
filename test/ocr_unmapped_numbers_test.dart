@@ -50,4 +50,31 @@ void main() {
       expect(unmappedNumbers, isA<List<double>>());
     });
   });
+
+  group('OCR parsing robustness (missing decimals and normalization)', () {
+    test('extractFeesAndTotals handles missing decimal numbers', () {
+      final service = OCRService();
+      const sampleText = '''
+        Subtotal JOD 1250
+        Tax JOD 150
+        Service Fee JOD 225
+        Delivery JOD 300
+        Total JOD 1725
+      ''';
+
+      final fees = service.extractFeesAndTotals(sampleText);
+      expect(fees['subtotal'], equals(12.50));
+      expect(fees['tax'], equals(1.50));
+      expect(fees['service'], equals(2.25));
+      expect(fees['delivery'], equals(3.00));
+      expect(fees['total'], equals(17.25));
+    });
+
+    test('normalizeOcrText fixes currency token and decimal comma', () {
+      final service = OCRService();
+      const raw = 'Total J0D 12,50';
+      final normalized = service.normalizeOcrText(raw);
+      expect(normalized.contains('JOD 12.50'), isTrue);
+    });
+  });
 }

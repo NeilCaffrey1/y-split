@@ -280,6 +280,8 @@ class OCRService {
               fees['tax'] = price;
             } else if (name.contains('delivery')) {
               fees['delivery'] = price;
+            } else if (name.contains('discount')) {
+              fees['discount'] = price;
             } else if (name.contains('subtotal')) {
               fees['subtotal'] = price;
             } else if (name.contains('total')) {

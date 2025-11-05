@@ -194,7 +194,7 @@ class _ReceiptSplitterPageState extends State<ReceiptSplitterPage>
         title: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: Text(
-            'Receipt Splitter',
+            'Smart Receipt Splitter',
             key: ValueKey(_matrix.items.length),
             style: const TextStyle(
               fontWeight: FontWeight.w600,
